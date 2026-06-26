@@ -1,0 +1,10 @@
+INFO:     Will watch for changes in these directories: ['C:\\Users\\apm20\\OneDrive\\Desktop\\project\\Add-on\\GenAI-Project\\backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [24276] using WatchFiles
+INFO:     Started server process [1476]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52468 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59577 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61444 - "GET / HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'prompts.py'. Reloading...

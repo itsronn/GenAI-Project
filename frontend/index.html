@@ -898,35 +898,56 @@
     function generateDynamicSimulation(claim, roundsCount, forPersona, againstPersona) {
       const isAggressiveFor = forPersona > 60;
       const isFactHeavyAgainst = againstPersona > 60;
-      
-      const forTone = isAggressiveFor ? "aggressively asserts that" : "objectively outlines how";
-      const againstTone = isFactHeavyAgainst ? "analytically demonstrates that" : "critically argues that";
+
+      const forOpeners = [
+        `I believe the claim "${claim}" is clearly true, and here's why. The evidence overwhelmingly points in one direction.`,
+        `Let me explain why I'm convinced the claim "${claim}" is right. The logic is straightforward when you look at the facts.`,
+        `I'm going to argue that "${claim}" is absolutely correct. My opponent will try to muddy the waters, but the truth is clear.`
+      ];
+      const forRebuttals = [
+        `My opponent makes a decent point, but they're overlooking something crucial. The claim "${claim}" isn't just plausible — it's the only logical conclusion once you consider the broader picture.`,
+        `I hear what my opponent is saying, but I think they've missed the mark here. The claim "${claim}" stands up to scrutiny precisely because of the evidence they chose to ignore.`,
+        `My opponent's argument sounds reasonable on the surface, but it falls apart when you dig deeper. The claim "${claim}" is correct, and I'll tell you exactly why their counter-argument doesn't hold water.`
+      ];
+      const againstOpeners = [
+        `I respectfully disagree with the claim "${claim}". Here's why I think it's fundamentally wrong.`,
+        `Let me explain why I believe the claim "${claim}" doesn't hold up. The problems start with the basic assumptions.`,
+        `I'm going to argue that "${claim}" is mistaken. My opponent will present a nice story, but the reality is much more complicated.`
+      ];
+      const againstRebuttals = [
+        `My opponent makes a good case, but I think they've overlooked some critical flaws. The claim "${claim}" simply doesn't work when you test it against real-world evidence.`,
+        `I see where my opponent is coming from, but they're painting an incomplete picture. The claim "${claim}" fails because of the very factors they've conveniently left out.`,
+        `My opponent's argument sounds compelling, but it's built on shaky ground. The claim "${claim}" falls apart once you apply basic critical thinking.`
+      ];
 
       const rounds = [];
       for (let i = 0; i < roundsCount; i++) {
-        rounds.push({
-          for: `${forTone} the claim "${claim}" holds true in Round ${i+1}. Under modern socio-technological conditions, this position creates optimized outcomes by reducing systemic redundancies and fostering dynamic growth. Empirical trials support this assertion, showing a significant positive deviation in performance parameters.`,
-          against: `${againstTone} the opposite holds in Round ${i+1}. The argument fails to take into account key structural limitations and externalities. Over-reliance on this model risks collapsing operational stability and introduces unforeseen vulnerabilities that outweigh the short-term gains.`
-        });
+        const forText = i === 0
+          ? forOpeners[i % forOpeners.length]
+          : forRebuttals[i % forRebuttals.length];
+        const againstText = i === 0
+          ? againstOpeners[i % againstOpeners.length]
+          : againstRebuttals[i % againstRebuttals.length];
+
+        rounds.push({ for: forText, against: againstText });
       }
 
-      // Add a fallacy tag manually in round 2 of simulated claim
       if (rounds.length >= 2) {
-        rounds[1].for += ` It would be a <span class='fallacy-highlight'>false dilemma<span class='fallacy-tooltip-box'><strong>False Dilemma Fallacy</strong>Assuming only two choices exist (accepting the claim or total operational collapse), ignoring moderate compromises.</span></span> to assume we must choose between static tradition and full systemic revision.`;
-        rounds[1].against += ` My opponent's logic borders on a <span class='fallacy-highlight'>slippery slope<span class='fallacy-tooltip-box'><strong>Slippery Slope Fallacy</strong>Claiming that any opposition to the claim will immediately result in static decay and operational collapse.</span></span>.`;
+        rounds[1].for += ` In fact, my opponent is creating a <span class='fallacy-highlight'>false dilemma<span class='fallacy-tooltip-box'><strong>False Dilemma Fallacy</strong>Presenting only two extreme options as if no middle ground exists.</span></span> by pretending we have to choose between two extremes. The real world is more nuanced, and the claim accommodates that nuance.`;
+        rounds[1].against += ` I'd argue my opponent is sliding down a <span class='fallacy-highlight'>slippery slope<span class='fallacy-tooltip-box'><strong>Slippery Slope Fallacy</strong>Assuming a small first step inevitably leads to an extreme outcome without evidence.</span></span> — assuming that accepting any part of their position means accepting the whole thing, consequences and all.`;
       }
 
       return {
         rounds,
         verdict: {
-          for_score: Math.floor(Math.random() * 3) + 6, // 6 to 8
-          against_score: Math.floor(Math.random() * 3) + 6, // 6 to 8
+          for_score: Math.floor(Math.random() * 3) + 6,
+          against_score: Math.floor(Math.random() * 3) + 6,
           fallacies_detected: [
-            { agent: "FOR", name: "False Dilemma", detail: "Suggesting only two extreme solutions." },
-            { agent: "AGAINST", name: "Slippery Slope", detail: "Projecting rapid systemic decay from mild resistance." }
+            { agent: "FOR", name: "False Dilemma", detail: "Presenting only two extreme options as if no middle ground exists." },
+            { agent: "AGAINST", name: "Slippery Slope", detail: "Assuming a small first step inevitably leads to an extreme outcome." }
           ],
-          verdict: "Adjudicated Verdict Declared",
-          reasoning: `The panel evaluated the custom claim: "${claim}". The FOR agent argued passionately, focusing on systemic growth, while the AGAINST agent countered with structural vulnerabilities. Both displayed logical consistency but slipped into rhetorical fallacies in Round 2. The final scores reflect a close logical contest.`
+          verdict: "Verdict Declared",
+          reasoning: `After reviewing the debate on "${claim}", I found both sides made compelling cases. The FOR agent argued from conviction, while the AGAINST agent countered with skepticism. Both committed minor logical missteps. The final scores reflect a closely contested debate.`
         }
       };
     }
@@ -1067,15 +1088,29 @@
           const data = await res.json();
           addLog(`Backend successfully generated debate! Loading transcripts...`, "system");
           
-          // Fast-play rendering of the backend data
           for (let i = 0; i < data.rounds.length; i++) {
+            setActiveAgent("FOR");
             setDisplayedRounds(prev => [...prev, {
               for: data.rounds[i].for,
-              against: data.rounds[i].against
+              against: ""
             }]);
-            addLog(`Loaded Round ${i+1} from backend.`, "system");
-            await delay(400);
+            addLog(`Round ${i+1} - Agent FOR published arguments.`, "for");
+            await delay(800);
+
+            setActiveAgent("AGAINST");
+            await delay(600);
+            setDisplayedRounds(prev => {
+              const updated = [...prev];
+              updated[i].against = data.rounds[i].against;
+              return updated;
+            });
+            addLog(`Round ${i+1} - Agent AGAINST published rebuttal.`, "against");
+            await delay(800);
           }
+
+          setActiveAgent("JUDGE");
+          addLog(`Judge is analyzing all arguments for logical fallacies...`, "judge");
+          await delay(1200);
 
           if (data.verdict) {
             // Conform backend format if it is raw strings or custom shaped
@@ -1119,6 +1154,7 @@
             const forScore = cleanVerdict.for_score || 5;
             const againstScore = cleanVerdict.against_score || 5;
             setConfidence(Math.round((forScore / (forScore + againstScore)) * 100));
+            setActiveAgent("");
           }
         } catch (err) {
           addLog(`Backend communication failed: ${err.message}`, "system");

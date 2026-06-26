@@ -4,6 +4,7 @@ import json
 from llm_clients import call_llm
 from prompts import for_prompt, against_prompt, judge_prompt
 from config import AGENT_CONFIG, NUM_ROUNDS_DEFAULT
+from dynamic_rag import build_dynamic_context
 
 
 def _clean_json_response(raw: str) -> dict:
@@ -19,18 +20,20 @@ def _clean_json_response(raw: str) -> dict:
 async def run_debate(claim: str, num_rounds: int = NUM_ROUNDS_DEFAULT) -> dict:
     debate_state = {"claim": claim, "rounds": []}
 
+    debate_context = build_dynamic_context(claim)
+
     for i in range(num_rounds):
         opponent_last_for = debate_state["rounds"][-1]["against"] if i > 0 else None
         opponent_last_against = debate_state["rounds"][-1]["for"] if i > 0 else None
 
         for_task = asyncio.to_thread(
             call_llm,
-            for_prompt(claim, opponent_last_for),
+            for_prompt(claim, opponent_last_for, context=debate_context),
             **AGENT_CONFIG["for"],
         )
         against_task = asyncio.to_thread(
             call_llm,
-            against_prompt(claim, opponent_last_against),
+            against_prompt(claim, opponent_last_against, context=debate_context),
             **AGENT_CONFIG["against"],
         )
 
