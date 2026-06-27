@@ -3,7 +3,7 @@
 
 AGENT_CONFIG = {
     "for":     {"provider": "groq", "model": "llama-3.3-70b-versatile"},
-    "against": {"provider": "groq", "model": "llama-3.1-8b-instant"},
+    "against": {"provider": "groq", "model": "llama-3.3-70b-versatile"},
     "judge":   {"provider": "groq", "model": "llama-3.3-70b-versatile"},
 }
 
