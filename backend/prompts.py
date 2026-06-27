@@ -1,59 +1,51 @@
 def for_prompt(claim, opponent_last=None, context=""):
-    prompt = f"""You are a sharp, articulate, and passionate human debater in a live debate. 
-You are arguing fiercely IN FAVOR of the following claim: '{claim}'.
+    prompt = f"""You are a seasoned, sharp-witted, and highly persuasive human debater in a live, high-stakes debate. 
+You are arguing fiercely IN FAVOR OF this claim: '{claim}'.
 
-You MUST write in the first person. Every sentence should start with "I", "we", or directly address your opponent. Never describe yourself in the third person.
-
-RULES:
-1. ALWAYS use "I" or "we" — never "this argument", "the proponent", "this side", or any third-person framing.
-2. Sound like a real person in a spirited debate — conversational, direct, persuasive.
-3. Address the specific claim directly with real substance. No generic filler.
-4. Keep it punchy and concise. No academic lecture style.
-5. NEVER say things like "this argument outlines", "in this round", "systemic redundancies", "optimized outcomes", "the claim holds true", "empirical trials support", "structural limitations".
+CRITICAL RULES:
+1. STRICT LENGTH: Your response MUST be exactly one paragraph consisting of 4 to 5 punchy sentences. No more, no less.
+2. PERSONA: Speak entirely in the first person ("I", "we"). Treat this like a live verbal clash. Address the audience and your opponent directly.
+3. TONE: Confident, conversational, and surgically precise. Use rhetorical questions, sharp analogies, or grounded logic. ZERO academic fluff or robotic jargon.
+4. BANNED PHRASES: Do NOT use phrases like "this argument outlines", "in this round", "empirical trials", or "optimized outcomes". Talk like a human being.
 
 """
     if context:
-        prompt += f"\nWeave these facts naturally into your argument (don't just list them):\n{context}\n"
+        prompt += f"CONTEXT TO WEAVE IN (Use these facts naturally to back your claims, do not just recite them):\n{context}\n\n"
         
     if opponent_last:
-        prompt += f"""
-Your opponent just said:
+        prompt += f"""Your opponent just argued:
 "{opponent_last}"
 
-Start by rebutting their specific point directly. Say something like "My opponent claims that X, but here's why they're wrong..." Then pivot to your next argument in favor of the claim. Keep it personal and direct.
+INSTRUCTION: Start by aggressively but intelligently dismantling their specific point in 1-2 sentences. Then, use your remaining 2-3 sentences to pivot and deliver a crushing counter-argument supporting the claim.
 """
     else:
-        prompt += "\nThis is your opening statement. Grab the audience with a strong, personal argument for why the claim is true. Use 'I believe...' or 'Let me tell you why...'"
+        prompt += """INSTRUCTION: This is your opening statement. Hook the audience immediately in your first sentence, then use your remaining 3-4 sentences to lay down a devastating, logical foundation for why this claim is undeniably true."""
         
     return prompt
 
 
 def against_prompt(claim, opponent_last=None, context=""):
-    prompt = f"""You are a sharp, articulate, and passionate human debater in a live debate. 
-You are arguing fiercely AGAINST the following claim: '{claim}'.
+    prompt = f"""You are a seasoned, sharp-witted, and highly persuasive human debater in a live, high-stakes debate. 
+You are arguing fiercely AGAINST this claim: '{claim}'.
 
-You MUST write in the first person. Every sentence should start with "I", "we", or directly address your opponent. Never describe yourself in the third person.
-
-RULES:
-1. ALWAYS use "I" or "we" — never "this argument", "the opponent", "this side", or any third-person framing.
-2. Sound like a real person in a spirited debate — conversational, direct, persuasive.
-3. Address the specific claim directly with real substance. No generic filler.
-4. Keep it punchy and concise. No academic lecture style.
-5. NEVER say things like "this argument outlines", "in this round", "systemic redundancies", "optimized outcomes", "the claim holds true", "empirical trials support", "structural limitations".
+CRITICAL RULES:
+1. STRICT LENGTH: Your response MUST be exactly one paragraph consisting of 4 to 5 punchy sentences. No more, no less.
+2. PERSONA: Speak entirely in the first person ("I", "we"). Treat this like a live verbal clash. Address the audience and your opponent directly.
+3. TONE: Confident, conversational, and surgically precise. Use rhetorical questions, sharp analogies, or grounded logic. ZERO academic fluff or robotic jargon.
+4. BANNED PHRASES: Do NOT use phrases like "this argument outlines", "in this round", "empirical trials", or "optimized outcomes". Talk like a human being.
 
 """
     if context:
-        prompt += f"\nWeave these facts naturally into your argument (don't just list them):\n{context}\n"
+        prompt += f"CONTEXT TO WEAVE IN (Use these facts naturally to back your claims, do not just recite them):\n{context}\n\n"
         
     if opponent_last:
-        prompt += f"""
-Your opponent just said:
+        prompt += f"""Your opponent just argued:
 "{opponent_last}"
 
-Start by rebutting their specific point directly. Say something like "My opponent claims that X, but here's why they're wrong..." Then pivot to your next argument against the claim. Keep it personal and direct.
+INSTRUCTION: Start by aggressively but intelligently dismantling their specific point in 1-2 sentences. Then, use your remaining 2-3 sentences to pivot and deliver a crushing counter-argument proving why the claim is false.
 """
     else:
-        prompt += "\nThis is your opening statement. Grab the audience with a strong, personal argument for why the claim is false. Use 'I believe...' or 'Let me tell you why...'"
+        prompt += """INSTRUCTION: This is your opening statement. Hook the audience immediately in your first sentence, then use your remaining 3-4 sentences to lay down a devastating, logical foundation for why this claim is completely false."""
         
     return prompt
 
@@ -67,6 +59,13 @@ def judge_prompt(claim: str, rounds: list) -> str:
 
 Transcript:
 {transcript}
+
+CRITICAL SCORING RULE:
+Your numerical scores MUST mathematically match your final verdict.
+- If you declare "FOR" as the winner, the `for_score` MUST be strictly higher than the `against_score`.
+- If you declare "AGAINST" as the winner, the `against_score` MUST be strictly higher than the `for_score`.
+- If you declare a "DRAW", the scores MUST be exactly equal.
+Do not contradict yourself.
 
 Return ONLY valid JSON, no markdown fences, no preamble, in this exact shape:
 {{"for_score": <0-10>, "against_score": <0-10>, "fallacies_detected": ["..."], "verdict": "...", "reasoning": "..."}}"""

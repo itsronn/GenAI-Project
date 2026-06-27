@@ -3,8 +3,8 @@
 
 AGENT_CONFIG = {
     "for":     {"provider": "groq", "model": "llama-3.3-70b-versatile"},
-    "against": {"provider": "groq", "model": "qwen/qwen3-32b"},
-    "judge":   {"provider": "groq", "model": "openai/gpt-oss-120b"},
+    "against": {"provider": "groq", "model": "llama-3.1-8b-instant"},
+    "judge":   {"provider": "groq", "model": "llama-3.3-70b-versatile"},
 }
 
 # Backup model slugs in case a free model gets pulled from OpenRouter:
