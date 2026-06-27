@@ -17,6 +17,8 @@ app.add_middleware(
 class DebateRequest(BaseModel):
     claim: str
     num_rounds: int = 3
+    for_persona: int = 50
+    against_persona: int = 50
 
 
 @app.get("/")
@@ -26,4 +28,4 @@ def health():
 
 @app.post("/debate")
 async def debate(req: DebateRequest):
-    return await run_debate(req.claim, req.num_rounds)
+    return await run_debate(req.claim, req.num_rounds, req.for_persona, req.against_persona)

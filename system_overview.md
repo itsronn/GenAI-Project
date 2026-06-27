@@ -46,6 +46,7 @@ GenAI-Project/
 - **Vite 8 + React 19** build toolchain. Run with `npm run dev` at `localhost:5173`.
 - **Single mode** — always sends `POST /debate` to the FastAPI backend at `http://localhost:8000`. No client-side simulation or hardcoded debate data.
 - **UI features**: Confidence meter, real-time log panel, fallacy tooltips with hover descriptions, animated "thinking" states (pulsing glow on active agent columns), and a verdict card with three score rings.
+- **Persona sliders** — Two sliders (FOR and AGAINST) let the user adjust debate tone (Empathetic/Rhetorical ↔ Balanced/Dialectical ↔ Aggressive/Fact-Heavy). Values are sent to the backend and injected into the prompt as a `PERSONA ADJUSTMENT` directive.
 - **Winner derivation** — The center ring derives the winner strictly from the numerical scores (`parseInt`), not from the LLM's text verdict. Handles string scores like `"7/10"` safely. The LLM's text verdict is shown separately below the rings.
 
 ### Backend (`backend/`)
@@ -53,20 +54,21 @@ GenAI-Project/
 #### `main.py` — FastAPI Server
 - Endpoints:
   - `GET /` — Health check (`{"status": "ok"}`)
-  - `POST /debate` — Accepts `{"claim": "...", "num_rounds": 3}`, returns the full debate transcript + verdict.
+  - `POST /debate` — Accepts `{"claim": "...", "num_rounds": 3, "for_persona": 50, "against_persona": 50}`, returns the full debate transcript + verdict.
 - CORS is wide open (`allow_origins=["*"]`).
 
 #### `config.py` — Agent Configuration
-- Maps the three roles to provider/model pairs (all Groq by default):
+- Maps the three roles to provider/model pairs (all Groq / `llama-3.3-70b-versatile` by default):
   - **FOR**: `groq` / `llama-3.3-70b-versatile`
   - **AGAINST**: `groq` / `llama-3.3-70b-versatile`
   - **JUDGE**: `groq` / `llama-3.3-70b-versatile`
 - `NUM_ROUNDS_DEFAULT = 3`
 
 #### `prompts.py` — Prompt Templates
-- `for_prompt(claim, opponent_last, context)` — Sharp-witted human debater persona. Strict 4–5 sentence limit. If a prior round exists, it starts by rebutting the opponent (1–2 sentences) then pivots to a counter-argument (2–3 sentences). First-person only ("I", "we").
-- `against_prompt(claim, opponent_last, context)` — Same structure for the Opponent.
+- `for_prompt(claim, opponent_last, context, persona)` — Sharp-witted human debater persona. Strict 4–5 sentence limit. If a prior round exists, it starts by rebutting the opponent (1–2 sentences) then pivots to a counter-argument (2–3 sentences). First-person only ("I", "we"). Accepts a `persona` integer (10–90) mapped to tone via `_persona_tone()`.
+- `against_prompt(claim, opponent_last, context, persona)` — Same structure for the Opponent, with independent persona control.
 - `judge_prompt(claim, rounds)` — Asks the Judge to output **strict JSON** with `for_score`, `against_score`, `fallacies_detected`, `verdict`, and `reasoning`. Includes a **CRITICAL SCORING RULE** forcing scores to mathematically match the verdict (FOR wins → for_score > against_score, DRAW → scores equal).
+- `_persona_tone(value, role)` — Maps slider values (10–90) to tone instructions: ≤30 → empathetic/Socratic, 40–60 → balanced/dialectical, ≥70 → aggressive/fact-heavy.
 
 #### `orchestrator.py` — Core Logic
 - `run_debate(claim, num_rounds)` — Async function that:

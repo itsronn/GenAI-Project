@@ -44,11 +44,13 @@ function App() {
     addLog(`Sending debate request to LLM backend...`, "system");
     addLog(`Claim: "${selectedClaim}" | Rounds: ${numRounds}`, "system");
 
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+
     try {
-      const res = await fetch("http://localhost:8000/debate", {
+      const res = await fetch(`${BACKEND_URL}/debate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ claim: selectedClaim, num_rounds: numRounds })
+        body: JSON.stringify({ claim: selectedClaim, num_rounds: numRounds, for_persona: forPersona, against_persona: againstPersona })
       });
 
       if (!res.ok) {
@@ -239,18 +241,18 @@ function App() {
                 <Icons.Cpu />
                 <span>Assigned Models</span>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.85rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-for)' }}>FOR:</span>
-                  <span style={{ fontWeight: '500' }}>Gemini 2.5 Flash</span>
+                  <span style={{ fontWeight: '500' }}>Llama 3.3 70B (Groq)</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-against)' }}>AGAINST:</span>
-                  <span style={{ fontWeight: '500' }}>Llama 3.3 70B</span>
+                  <span style={{ fontWeight: '500' }}>Llama 3.3 70B (Groq)</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--color-judge)' }}>JUDGE:</span>
-                  <span style={{ fontWeight: '500' }}>DeepSeek R1</span>
+                  <span style={{ fontWeight: '500' }}>Llama 3.3 70B (Groq)</span>
                 </div>
               </div>
             </div>
@@ -327,8 +329,8 @@ function App() {
 
             <div className="meter-container">
               <div className="meter-labels">
-                <span style={{ color: 'var(--color-for)' }}>FOR (Gemini)</span>
-                <span style={{ color: 'var(--color-against)' }}>AGAINST (Llama)</span>
+                <span style={{ color: 'var(--color-for)' }}>FOR (Llama 3.3 70B)</span>
+                <span style={{ color: 'var(--color-against)' }}>AGAINST (Llama 3.3 70B)</span>
               </div>
               <div className="meter-bar-outer">
                 <div className="meter-bar-for" style={{ width: `${confidence}%` }}></div>
@@ -352,7 +354,7 @@ function App() {
                       <div className="agent-avatar avatar-for">G</div>
                       <div>
                         <div style={{ fontSize: '0.9rem', fontWeight: '600' }}>FOR Agent</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Gemini 2.5 Flash</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Llama 3.3 70B (Groq)</div>
                       </div>
                     </div>
                     <span className="badge badge-for">Proponent</span>
@@ -372,7 +374,7 @@ function App() {
                     {activeAgent === "FOR" && (
                       <div className="thinking-placeholder">
                         <Icons.Search />
-                        <span>Gemini is researching and drafting rebuttal</span>
+                        <span>FOR agent is researching and drafting rebuttal</span>
                         <div className="dot-typing"><span></span><span></span><span></span></div>
                       </div>
                     )}
@@ -385,7 +387,7 @@ function App() {
                       <div className="agent-avatar avatar-against">L</div>
                       <div>
                         <div style={{ fontSize: '0.9rem', fontWeight: '600' }}>AGAINST Agent</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Llama 3.3 70B</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Llama 3.3 70B (Groq)</div>
                       </div>
                     </div>
                     <span className="badge badge-against">Opponent</span>
@@ -405,7 +407,7 @@ function App() {
                     {activeAgent === "AGAINST" && (
                       <div className="thinking-placeholder">
                         <Icons.Search />
-                        <span>Llama is searching files and formulating response</span>
+                        <span>AGAINST agent is formulating response</span>
                         <div className="dot-typing"><span></span><span></span><span></span></div>
                       </div>
                     )}
@@ -420,7 +422,7 @@ function App() {
                       <Icons.Gavel style={{ color: 'var(--color-judge)' }} />
                       <span style={{ fontSize: '1.2rem', fontWeight: '700', fontFamily: 'var(--font-title)' }}>Court Adjudication Verdict</span>
                     </div>
-                    <span className="badge badge-judge">DEEPSEEK R1 JUDGE</span>
+                    <span className="badge badge-judge">LLAMA 3.3 70B JUDGE</span>
                   </div>
 
                   <div className="verdict-score-ring-row">
@@ -493,7 +495,7 @@ function App() {
                   <div style={{ textAlign: 'center' }}>
                     <h4 style={{ color: '#fff' }}>Judge Agent is Adjudicating</h4>
                     <p style={{ fontSize: '0.85rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
-                      DeepSeek R1 is parsing all arguments for logical fallacies and evaluating fact points...
+                      Judge agent is parsing all arguments for logical fallacies and evaluating points...
                     </p>
                   </div>
                   <div className="dot-typing"><span></span><span></span><span></span></div>
@@ -530,11 +532,11 @@ function App() {
                 </strong>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Gemini (FOR):</span>
+                    <span>FOR Agent:</span>
                     <span style={{ color: 'var(--color-for)' }}>{displayedRounds.length} rounds active</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span>Llama (AGAINST):</span>
+                    <span>AGAINST Agent:</span>
                     <span style={{ color: 'var(--color-against)' }}>{displayedRounds.filter(r => r.against).length} rounds active</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>

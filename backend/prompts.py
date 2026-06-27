@@ -1,4 +1,17 @@
-def for_prompt(claim, opponent_last=None, context=""):
+def _persona_tone(value: int, role: str) -> str:
+    if value <= 30:
+        if role == "for":
+            return "Use a warm, empathetic, and understanding tone. Appeal to shared values and human impact. Be gentle but persuasive."
+        return "Use a humble, questioning, and Socratic tone. Raise thoughtful doubts rather than attacking directly. Be curious and conversational."
+    elif value >= 70:
+        if role == "for":
+            return "Use an aggressive, relentless, and confrontational tone. Attack weak reasoning head-on. Be forceful and uncompromising."
+        return "Use a sharp, skeptical, and data-driven tone. Dismantle arguments with cold logic and hard facts. Be ruthless but precise."
+    return "Maintain a balanced, confident, and dialectical tone. Combine logical reasoning with persuasive appeal. Be firm but fair."
+
+
+def for_prompt(claim, opponent_last=None, context="", persona=50):
+    tone = _persona_tone(persona, "for")
     prompt = f"""You are a seasoned, sharp-witted, and highly persuasive human debater in a live, high-stakes debate. 
 You are arguing fiercely IN FAVOR OF this claim: '{claim}'.
 
@@ -7,6 +20,7 @@ CRITICAL RULES:
 2. PERSONA: Speak entirely in the first person ("I", "we"). Treat this like a live verbal clash. Address the audience and your opponent directly.
 3. TONE: Confident, conversational, and surgically precise. Use rhetorical questions, sharp analogies, or grounded logic. ZERO academic fluff or robotic jargon.
 4. BANNED PHRASES: Do NOT use phrases like "this argument outlines", "in this round", "empirical trials", or "optimized outcomes". Talk like a human being.
+5. PERSONA ADJUSTMENT: {tone}
 
 """
     if context:
@@ -24,7 +38,8 @@ INSTRUCTION: Start by aggressively but intelligently dismantling their specific 
     return prompt
 
 
-def against_prompt(claim, opponent_last=None, context=""):
+def against_prompt(claim, opponent_last=None, context="", persona=50):
+    tone = _persona_tone(persona, "against")
     prompt = f"""You are a seasoned, sharp-witted, and highly persuasive human debater in a live, high-stakes debate. 
 You are arguing fiercely AGAINST this claim: '{claim}'.
 
@@ -33,6 +48,7 @@ CRITICAL RULES:
 2. PERSONA: Speak entirely in the first person ("I", "we"). Treat this like a live verbal clash. Address the audience and your opponent directly.
 3. TONE: Confident, conversational, and surgically precise. Use rhetorical questions, sharp analogies, or grounded logic. ZERO academic fluff or robotic jargon.
 4. BANNED PHRASES: Do NOT use phrases like "this argument outlines", "in this round", "empirical trials", or "optimized outcomes". Talk like a human being.
+5. PERSONA ADJUSTMENT: {tone}
 
 """
     if context:

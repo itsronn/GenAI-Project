@@ -17,7 +17,7 @@ def _clean_json_response(raw: str) -> dict:
     return json.loads(cleaned)
 
 
-async def run_debate(claim: str, num_rounds: int = NUM_ROUNDS_DEFAULT) -> dict:
+async def run_debate(claim: str, num_rounds: int = NUM_ROUNDS_DEFAULT, for_persona: int = 50, against_persona: int = 50) -> dict:
     debate_state = {"claim": claim, "rounds": []}
 
     debate_context = build_dynamic_context(claim)
@@ -28,12 +28,12 @@ async def run_debate(claim: str, num_rounds: int = NUM_ROUNDS_DEFAULT) -> dict:
 
         for_task = asyncio.to_thread(
             call_llm,
-            for_prompt(claim, opponent_last_for, context=debate_context),
+            for_prompt(claim, opponent_last_for, context=debate_context, persona=for_persona),
             **AGENT_CONFIG["for"],
         )
         against_task = asyncio.to_thread(
             call_llm,
-            against_prompt(claim, opponent_last_against, context=debate_context),
+            against_prompt(claim, opponent_last_against, context=debate_context, persona=against_persona),
             **AGENT_CONFIG["against"],
         )
 
