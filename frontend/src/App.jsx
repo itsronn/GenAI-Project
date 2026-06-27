@@ -44,7 +44,7 @@ function App() {
     addLog(`Sending debate request to LLM backend...`, "system");
     addLog(`Claim: "${selectedClaim}" | Rounds: ${numRounds}`, "system");
 
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
     try {
       const res = await fetch(`${BACKEND_URL}/debate`, {
